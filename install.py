@@ -40,13 +40,18 @@ def install():
     for sub in ("skills/voice-audit", "hooks", "voice"):
         (CLAUDE / sub).mkdir(parents=True, exist_ok=True)
 
-    for src, dest in [
-        (HERE / "skills/voice-audit/SKILL.md", CLAUDE / "skills/voice-audit/SKILL.md"),
-        (HERE / "skills/voice-audit/check.py", CLAUDE / "skills/voice-audit/check.py"),
-        (HERE / "hooks/voice-prompt-guard.py", CLAUDE / "hooks/voice-prompt-guard.py"),
-        (HERE / "hooks/voice-compact-reset.py", CLAUDE / "hooks/voice-compact-reset.py"),
-        (HERE / "hooks/voice-guard.py", CLAUDE / "hooks/voice-guard.py"),
-    ]:
+    # Every skill folder in skills/ gets installed, so dropping a new skill into
+    # this repo needs no change here.
+    pairs = []
+    for skill_dir in sorted(p for p in (HERE / "skills").iterdir() if p.is_dir()):
+        target = CLAUDE / "skills" / skill_dir.name
+        target.mkdir(parents=True, exist_ok=True)
+        pairs += [(f, target / f.name) for f in sorted(skill_dir.iterdir())
+                  if f.is_file()]
+    pairs += [(f, CLAUDE / "hooks" / f.name)
+              for f in sorted((HERE / "hooks").glob("*.py"))]
+
+    for src, dest in pairs:
         shutil.copy2(src, dest)
         if dest.suffix == ".py":
             dest.chmod(0o755)
