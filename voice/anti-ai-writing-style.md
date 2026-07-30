@@ -12,7 +12,7 @@ Write like a sharp human who happens to be typing.
 - Short paragraphs. 1-2 sentences default. 3 max.
 - Get to the point. No warm-up laps.
 - Vary sentence length. Short punchy lines mixed with longer ones. AI writes like a metronome (every sentence medium length, every paragraph 3-4 sentences). Break that rhythm.
-- **Don't fragment causally linked ideas for false punch.** When two ideas have a clear causal or temporal relationship, keep them in one sentence or a tightly connected pair. Breaking a logical chain into short bursts loses the connective tissue the reader needs. "The failure showed up at deployment, but it actually started much earlier, when the problem was framed" is sharper than splitting that into two sentences. "When the business environment changed, the model stopped being useful" belongs attached to the sentence before it, not orphaned after a line break. And endings: "Building the model is just one phase of a successful project. Neglect the other phases and the model fails" lands harder than "The whole lifecycle matters. Not just the model." The fragment at the end only works when the ideas are genuinely separate. When one causes or follows the other, keep them together.
+- **Don't fragment causally linked ideas for false punch.** When two ideas have a clear causal or temporal relationship, keep them in one sentence or a tightly connected pair. Breaking a logical chain into short bursts loses the connective tissue the reader needs. "The failure showed up at deployment, but it actually started much earlier, when the problem was framed" is sharper than splitting that into two sentences. "When the business environment changed, the model stopped being useful" belongs attached to the sentence before it, not orphaned after a line break. And endings: "Model development is just one phase of a successful project, and the model fails when nobody works the other phases" lands harder than "The whole lifecycle matters. Not just the model." The fragment at the end only works when the ideas are genuinely separate. When one causes or follows the other, keep them together.
 - Start sentences with And, But, Like, So. Write as you speak. I love the idea that a new paragraph means a "but" or "therefore". It does not mean that I always write "but" or "therefore", but it's how you write captivating stories.
 - If you've made your point, stop. Don't summarize what someone just read 2 paragraphs ago.
 
@@ -114,6 +114,27 @@ Also banned: "serves as," "stands as," "marks a," "represents a," "boasts a," "f
 **Also banned: "go quiet."** AI euphemism for "stop responding" or "disappear." Nobody in a real business conversation says this. Say what actually happens: "they stop calling back," "we never hear from them again," "they ghost us," "they don't reply." Name the behavior.
 
 **Also banned: "quietly."** "The model quietly stopped working." "It quietly became the standard." "Quietly shipped in March." AI reaches for this adverb to add drama to something nobody watched happen. Things don't happen quietly or loudly, they just happen. Cut the word. If the point is that nobody noticed, say that: "it stopped working in March and nobody caught it until June."
+
+**Also banned: "out loud," "aloud," "loudly," "loud and clear," "in no uncertain terms," "put bluntly," "bluntly," "flatly," "candidly," "frankly," "openly," "simply put," "put simply," "needless to say," "so to speak," "voiced," "echoed," "weighed in," "articulated," "notes that," "shares that," "muses."**
+
+Same family as "quietly." All of them describe the *manner* in which something was said, written, admitted, or understood, and none of them change what was said. "A model a person can explain out loud" is a model a person can explain. "She voiced concerns" is she objected. "The message was loud and clear" is the message was X. The adverb or the fancy speech verb adds a performance the reader didn't watch.
+
+Three shapes it takes:
+
+- **Volume and tone adverbs.** out loud, aloud, quietly, loudly, flatly, bluntly, openly.
+- **Sincerity flags.** frankly, candidly, in no uncertain terms, needless to say. Cousins of "honestly," and banned for the same reason: flagging your own candor implies the rest was hedged.
+- **Speech verbs doing work "said" already does.** voiced, echoed, weighed in, articulated, notes that, shares that, muses. AI reaches for these because it won't repeat "said," which is 4D elegant variation wearing a press-release suit.
+
+The fix: cut the manner word, or name the audience and the setting, which is the specific detail the adverb was standing in for.
+
+- AVOID: "Pick a model a person can explain out loud."
+- USE: "Pick a model someone can explain to a city council."
+- AVOID: "Several stakeholders voiced concerns."
+- USE: "Two of the four community groups objected."
+- AVOID: "The report notes that response times fell."
+- USE: "Response times fell 12%."
+
+Watch the near-misses too. "Spoke to the challenges," "put a finer point on it," "said the quiet part out loud." Same move.
 
 **Also banned: "edge."** Covers "edge case," "edge cases," "competitive edge," "gives you an edge," "the edge." Both senses are vague. For the failure sense, name the actual scenario: "the one customer with two billing addresses," "what happens when the file is empty." For the advantage sense, name the actual advantage: "they answer in a day instead of a week." "Edge" tells the reader something exists at the boundary without saying what it is.
 
@@ -461,6 +482,33 @@ The test: if the last line could be lifted out and posted on its own, it's a kic
 Each one stages a small performance before the content arrives. The self-answered question is the sneakiest, because it looks like analysis. It's a speech tic on paper.
 
 Ask a question only when you're leaving it open for the reader. If you're going to answer it in the next sentence, skip the question and write the answer.
+
+### 4CC. The pseudo-imperative threat
+
+- "Get it wrong and a neighborhood absorbs a year of extra policing because the data said so."
+- "Skip any one domain and a city government ends up making decisions it can't explain or defend."
+- "Ship it late and the client walks."
+- "Miss the framing step and everything downstream is wasted."
+
+A bare command joined by "and" to a predicted consequence. Grammar calls it a pseudo-imperative, or an imperative-and-declarative. It's an if-then in a costume, and it is not a gerund, though it sits at the front of the sentence the same way one does.
+
+Why it reads as machine-written:
+
+- The command is fake. Nobody is being told to get it wrong or skip a domain. The imperative mood is borrowed for drama.
+- The conditional erases everyone. No date, no city, no name. Nothing has to have happened for the sentence to be true.
+- The consequence almost always lands on a generic institution ("a neighborhood," "a city government," "the team"), so the Agency Rule violation rides along inside the pattern.
+- The tail clause turns into a small mic drop.
+
+It's a cautionary tale (4S) and fake stakes (4P) compressed into one line. That compression is what makes it feel punchy while committing to nothing.
+
+The fix: name who does what, or state the condition flatly.
+
+- AVOID: "Get it wrong and a neighborhood absorbs a year of extra policing."
+- USE: "When the forecast is wrong, the patrols still show up, and that neighborhood lives with them for a year."
+- AVOID: "Skip any one domain and a city government ends up making decisions it can't explain."
+- USE: "City officials who skip a domain can't explain the decisions the model hands them."
+
+No exceptions. It fails when the consequence lands on a model or a deadline just as hard as when it lands on a neighborhood. Section 1 used to hold up "Neglect the other phases and the model fails" as a good ending; that example is gone, because it was this construction.
 
 
 ## 5. ANTI-OVERFITTING GUIDE

@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
 """
-UserPromptSubmit hook: when the user asks for prose, load the Voice DNA rules into
-context and instruct an audit before replying.
+UserPromptSubmit hook: when the user asks for prose, order the model to read the
+Voice DNA rules and audit against them before replying.
 
 The failure this fixes: the rules file is never in context, so following it
-depends on the model deciding to go read 500 lines first. This puts the rules
-in front of the model on every writing request, whether or not anyone remembers
-to ask.
+depends on the model deciding to go read 500 lines first. This puts the
+instruction in front of the model on every writing request, whether or not
+anyone remembers to ask.
+
+Why it points at the file instead of pasting it: the rules run to tens of KB.
+Claude Code caps injected additionalContext at ~2KB, spills the rest to a file,
+and shows the model a preview. Section 3F and everything after it never arrived,
+and the model drafted anyway because the top of the block looked like rules. A
+short instruction always lands whole, and a Read of the live file puts every
+line in context.
 
 Fires only on writing requests. Skips code requests so a "write a python script"
 prompt doesn't drag 30KB of prose rules along with it.
@@ -32,11 +39,11 @@ def rules_path():
 
 RULES = rules_path()
 
-# One marker per session. First writing request gets the full rules; later ones
-# get a short pointer, because the rules are already sitting in the context.
-# A PostCompact hook deletes the marker, so the next writing request after a
-# compaction re-injects the full text instead of pointing at rules that got
-# summarized away.
+# One marker per session. First writing request gets the full read-the-file
+# order; later ones get a short reminder, because by then the rules are already
+# sitting in the context. A PostCompact hook deletes the marker, so the next
+# writing request after a compaction orders a fresh read instead of trusting
+# rules that got summarized away.
 MARKERS = Path.home() / ".claude/hooks/.voice-sessions"
 
 # Asking for prose.
@@ -72,11 +79,18 @@ PROSE_ANCHOR = re.compile(r"""(?ix)
 
 INSTRUCTION = """\
 <voice-dna-enforcement>
-The user has asked for prose. Their Voice DNA rules are below, in full. They are not
-optional and they are not a style suggestion; they audit against them and count
-violations.
+The user has asked for prose. Their Voice DNA rules govern it. The rules are not
+optional and they are not a style suggestion; the user audits against them and
+counts violations.
 
-Before you show her anything you have written:
+STEP 0, before you draft a single sentence: use the Read tool on
+{rules}
+and read the whole file. It runs to hundreds of lines. Read all of it, including
+the negative-parallelism section (3F) and section 4, which sit near the end. Do
+not work from memory, from a summary, or from a truncated preview of these rules.
+If you have not read the file in this session, you do not know the rules.
+
+Then:
 
 1. Write the draft.
 2. Save it to a file and run:
@@ -84,35 +98,35 @@ Before you show her anything you have written:
    That catches banned words and phrases (parsed live from the rules file),
    em dashes, emoji, and the literal negative-parallelism patterns. Fix every
    HARD FAIL. Judge each JUDGMENT CANDIDATE on context.
-3. Do the judgment pass the script cannot do: negative parallelism in disguise,
-   fake-profound closing lines, metronome rhythm, abstract nouns doing human
-   work, premise payoff, validation statements. The voice-audit skill
-   (~/.claude/skills/voice-audit/SKILL.md) has the full checklist.
+3. A clean script run is half the audit. The script only matches literal
+   patterns, so a 3F reframe in different words sails through it. Read your own
+   draft line by line against the rules you just read: negative parallelism in
+   disguise, contrast-flip pairs, fake-profound closers, punchy summary tags,
+   metronome rhythm, gerund subjects, "gets [verbed]" passives, abstract nouns
+   doing human work, premise payoff, validation statements. The voice-audit
+   skill (~/.claude/skills/voice-audit/SKILL.md) has the full checklist.
 4. Show them the corrected version only. Do not show a draft, then an audit,
    then a fix. One clean version, with a short note on what the audit changed.
 
-If the request is short enough that a file feels like overkill, still apply the
-rules and still do the judgment pass. The rules govern a single sentence in a
+If the request is short enough that a file feels like overkill, still read the
+rules and still do the line-by-line pass. They govern a single sentence in a
 chat reply exactly as much as they govern a client blog post.
-
-The rules follow.
 </voice-dna-enforcement>
-
 """
 
 REMINDER = """\
 <voice-dna-enforcement>
-The user has asked for prose again. The full Voice DNA rules were injected earlier
-in this session, so they are not repeated here.
+The user has asked for prose again. Same requirement as earlier in this session.
 
-Same requirement as before: draft it, run
-python3 ~/.claude/skills/voice-audit/check.py <file> and clear every HARD FAIL,
-do the judgment pass for what the script cannot see, then show them the corrected
-version only.
+If you have already read
+{rules}
+in this session and it is still in your context, work from it. If it is not, or
+you are unsure, Read the whole file again now, before drafting. Never guess at
+these rules or work from a summary of them.
 
-If you cannot actually see the rules anywhere in your current context, do not
-guess at them. Read the rules file at ~/.claude/voice/anti-ai-writing-style.md
-before you draft.
+Then: draft it, run python3 ~/.claude/skills/voice-audit/check.py <file> and
+clear every HARD FAIL, do the line-by-line judgment pass for the patterns the
+script cannot match, and show them the corrected version only.
 </voice-dna-enforcement>
 """
 
@@ -152,13 +166,11 @@ def main():
     if CODE.search(prompt) and not PROSE_ANCHOR.search(prompt):
         return 0
 
-    if mark(payload.get("session_id", "")):
-        try:
-            context = INSTRUCTION + RULES.read_text(encoding="utf-8")
-        except Exception:
-            return 0
-    else:
-        context = REMINDER
+    if not RULES.exists():
+        return 0
+
+    template = INSTRUCTION if mark(payload.get("session_id", "")) else REMINDER
+    context = template.format(rules=RULES)
 
     print(json.dumps({
         "hookSpecificOutput": {

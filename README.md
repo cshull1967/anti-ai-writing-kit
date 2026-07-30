@@ -16,9 +16,15 @@ a file, Claude has a note saying the file exists, and following it means decidin
 to go read 500 lines before writing a sentence. In a long session that decision
 loses to everything else going on.
 
-So the rules load automatically instead. When you ask for writing of any kind,
-your rules go into the conversation before Claude writes a word, along with
-instructions to check the draft against them and fix it before showing you.
+So the decision gets taken away instead. When you ask for writing of any kind, a
+hook fires first and tells Claude to go read your rules file in full before it
+drafts a sentence, then to check the draft against them and fix it before showing
+you.
+
+An earlier version pasted the whole rules file into the conversation. That looks
+better and works worse: Claude Code caps injected context at about 2KB, so a long
+rules file arrives truncated, and Claude drafts from the first page while
+believing it has the lot. A short order to go read the file always arrives whole.
 
 ## What you need
 
@@ -51,8 +57,8 @@ the change.
 ~/.claude/voice/anti-ai-writing-style.md   your rules, edit this
 ~/.claude/voice/config.json                settings for the file guard
 ~/.claude/skills/voice-audit/              the /voice-audit command
-~/.claude/hooks/voice-prompt-guard.py      loads the rules when you ask for writing
-~/.claude/hooks/voice-compact-reset.py     reloads them after a long chat compacts
+~/.claude/hooks/voice-prompt-guard.py      orders a read of the rules when you ask for writing
+~/.claude/hooks/voice-compact-reset.py     re-orders the read after a long chat compacts
 ~/.claude/hooks/voice-guard.py             blocks bad saves (off by default)
 ```
 
@@ -62,8 +68,8 @@ does nothing the second time.
 
 ## Using it
 
-Ask Claude to write anything. The rules load on their own and the draft gets
-checked before it reaches you.
+Ask Claude to write anything. Claude reads the rules on its own and the draft
+gets checked before it reaches you.
 
 To check writing you already have:
 
@@ -147,7 +153,7 @@ leaves your rules file alone in case you want it.
 ## Credit
 
 The rules file grew out of a lot of drafts that got rewritten until they stopped
-sounding like a machine. Sections 3F, 4A through 4Z, and the anti-overfitting
+sounding like a machine. Sections 3F, 4A through 4CC, and the anti-overfitting
 guide in section 5 are the parts worth reading first.
 
 MIT licensed. Take it, change it, share it.

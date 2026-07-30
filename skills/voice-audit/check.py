@@ -61,7 +61,8 @@ def parse_rules(path):
     # "**Also banned: "x."**" entries anywhere in the doc.
     for m in re.finditer(r'\*\*Also banned:\s*(.+?)\*\*', text):
         for q in re.findall(r'"([^"]{2,40})"', m.group(1)):
-            q = q.strip().strip(".").lower()
+            # commas usually sit inside the quotes ("out loud," "aloud,")
+            q = q.strip().strip(".,;:").lower()
             if q:
                 (words if " " not in q else phrases).add(q)
 
@@ -72,7 +73,7 @@ def parse_rules(path):
             if not line.lstrip().startswith("-"):
                 continue
             for q in re.findall(r'"([^"]{3,60})"', line):
-                q = q.strip().strip(".").lower()
+                q = q.strip().strip(".,;:").lower()
                 # placeholders like "in today's [anything]" -> keep the stem
                 q = q.split("[")[0].strip()
                 if q and len(q) > 3:
@@ -122,6 +123,15 @@ HARD_PATTERNS = [
         r"(?im)^(here'?s the (thing|deal|part)|what it comes down to"
         r"|the (real|key|biggest|honest) (question|problem|insight|point|pitch)"
         r"|why i'?m telling you this|here'?s what works|the result|the takeaway):")),
+    # 4CC: bare command + "and" + predicted consequence ("Skip a domain and the
+    # city can't defend its decisions"). An if-then in a costume. No exceptions,
+    # including for consequences that land on an object rather than on people.
+    # Narrowed to omission/error verbs, which is where the construction lives.
+    ("4CC pseudo-imperative threat", re.compile(
+        r"(?im)(?:^|(?<=[.!?] ))(get (it|this|that) wrong|skip|miss|ignore"
+        r"|neglect|forget|overlook|underestimate|botch|rush|delay|guess|assume"
+        r"|lose|break|mess up|screw up|cut corners|wait too long|ship)\b"
+        r"[^.!?]{0,60}\band\b [^.!?]{2,80}[.!?]")),
 ]
 
 SOFT_PATTERNS = [
